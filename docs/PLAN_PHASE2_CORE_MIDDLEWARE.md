@@ -42,6 +42,9 @@ uv add "redis[hiredis]"
 
 Add fields:
 - `redis_url: str = "redis://localhost:6379/0"`
+- `rate_limit_free: int = 30`
+- `rate_limit_premium: int = 150`
+- `rate_limit_analyst: int = 500`
 - `alpha_vantage_api_key: str = ""`
 - `finnhub_api_key: str = ""`
 - `newsapi_api_key: str = ""`
@@ -72,11 +75,11 @@ TTL_FILINGS    = 0          # permanent (no expiry)
   - Key: `rate_limit:{user_id}:{hour_bucket}` where `hour_bucket = int(time.time() // 3600)`
   - INCR the key; on first write set EXPIRE to 3600s
   - If count > tier limit → return HTTP 429 with `Retry-After` header
-- Tier limits:
+- Tier limits read from `settings` at runtime (configurable via `.env`):
   ```
-  free     →  30 calls / hour
-  premium  → 150 calls / hour
-  analyst  → 500 calls / hour
+  RATE_LIMIT_FREE=30
+  RATE_LIMIT_PREMIUM=150
+  RATE_LIMIT_ANALYST=500
   ```
 - 429 response body:
   ```json
@@ -112,20 +115,28 @@ Stdout JSON is sufficient for the audit requirement — no Redis write needed.
 
 ### Step 5 — `src/fin_mcp/dependencies.py`
 
-`check_access(ctx: Context, *required_scopes: str) -> TokenClaims`
+Two exports: `check_access()` (underlying function) and `@require_scopes` (decorator).
 
-Called at the top of every tool function. Performs in order:
+**`check_access(ctx, *required_scopes) -> TokenClaims`**
 
+Performs in order:
 1. **Extract claims** from `ctx.request_context.request.state.token_claims`
 2. **Scope check** — if any required scope is missing from `claims.scopes`:
    - Audit log with `status="forbidden"`
    - Raise `McpError` with message `"insufficient_scope: <missing_scope>"`
 3. **Audit log** — emit `status="ok"` line
 
-Rate limiting is handled by `RateLimitMiddleware` at the HTTP layer before the tool runs,
-so `check_access` does not duplicate it.
-
 Returns `TokenClaims` so tools can use `subject` and `tier` if needed (e.g. watchlist scoping).
+
+**`@require_scopes(*required_scopes)`**
+
+Decorator that wraps a tool function and calls `check_access()` automatically before the
+tool body runs. Uses `inspect.signature` at decoration time to locate the `Context` parameter
+by type annotation. Uses `@functools.wraps` so FastMCP still sees the original signature
+and correctly injects `Context`.
+
+Rate limiting is handled by `RateLimitMiddleware` at the HTTP layer before the tool runs,
+so neither `check_access` nor `@require_scopes` duplicate it.
 
 ### Step 6 — Update `src/fin_mcp/server.py`
 
@@ -172,6 +183,11 @@ redis:
 ```
 REDIS_URL=redis://localhost:6379/0
 
+# Rate limits (calls per hour per tier)
+RATE_LIMIT_FREE=30
+RATE_LIMIT_PREMIUM=150
+RATE_LIMIT_ANALYST=500
+
 # Upstream API keys
 ALPHA_VANTAGE_API_KEY=your_key_here   # https://www.alphavantage.co/support/#api-key
 FINNHUB_API_KEY=your_key_here         # https://finnhub.io/register
@@ -199,11 +215,11 @@ NEWSAPI_API_KEY=your_key_here         # https://newsapi.org/register
 
 ## How Tools Use This in Phase 4
 
-Every tool follows this pattern:
+Every tool uses the `@require_scopes` decorator — no explicit `check_access()` call needed:
 ```python
 @mcp.tool(description="Get live quote for a ticker")
+@require_scopes("market:read")
 async def get_stock_quote(ticker: str, ctx: Context) -> dict[str, Any]:
-    claims = await check_access(ctx, "market:read")
     cached = await cache.get(f"quote:{ticker}")
     if cached:
         return cached
@@ -211,6 +227,8 @@ async def get_stock_quote(ticker: str, ctx: Context) -> dict[str, Any]:
     await cache.set(f"quote:{ticker}", data, TTL_QUOTE)
     return data
 ```
+
+`check_access()` is still available for tools that need dynamic scope checking at runtime.
 
 ---
 
