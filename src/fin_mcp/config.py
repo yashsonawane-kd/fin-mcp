@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     # Redis
     redis_url: str = "redis://localhost:6379/0"
 
+    # Rate limit: max calls per hour per tier
+    rate_limit_free: int = 30
+    rate_limit_premium: int = 150
+    rate_limit_analyst: int = 500
+
     # Upstream API keys
     alpha_vantage_api_key: str = ""
     finnhub_api_key: str = ""
