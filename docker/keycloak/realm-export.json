@@ -1,0 +1,229 @@
+{
+  "realm": "fin-mcp",
+  "enabled": true,
+  "displayName": "fin-mcp",
+  "accessTokenLifespan": 300,
+  "ssoSessionMaxLifespan": 36000,
+  "roles": {
+    "realm": [
+      {
+        "name": "free",
+        "description": "Free tier user"
+      },
+      {
+        "name": "premium",
+        "description": "Premium tier user"
+      },
+      {
+        "name": "analyst",
+        "description": "Analyst tier user"
+      }
+    ]
+  },
+  "defaultRoles": [
+    "free"
+  ],
+  "clientScopes": [
+    {
+      "name": "market:read",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "fundamentals:read",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "technicals:read",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "mf:read",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "news:read",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "news:sentiment",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "filings:read",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "filings:deep",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "macro:read",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "macro:historical",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "research:generate",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "watchlist:read",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    },
+    {
+      "name": "watchlist:write",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "mcp-resource-server",
+      "name": "fin-mcp Resource Server",
+      "enabled": true,
+      "bearerOnly": true,
+      "publicClient": false,
+      "protocol": "openid-connect"
+    },
+    {
+      "clientId": "mcp-public-client",
+      "name": "fin-mcp Public Client",
+      "enabled": true,
+      "publicClient": true,
+      "bearerOnly": false,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "redirectUris": [
+        "http://localhost:*",
+        "https://claude.ai/*",
+        "urn:ietf:wg:oauth:2.0:oob"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "defaultClientScopes": [
+        "openid",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "market:read",
+        "fundamentals:read",
+        "technicals:read",
+        "mf:read",
+        "news:read",
+        "news:sentiment",
+        "filings:read",
+        "filings:deep",
+        "macro:read",
+        "macro:historical",
+        "research:generate",
+        "watchlist:read",
+        "watchlist:write"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "free-user",
+      "firstName": "free",
+      "lastName": "user",
+      "enabled": true,
+      "email": "free@fin-mcp.local",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "free"
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "premium-user",
+      "firstName": "premium",
+      "lastName": "user",
+      "enabled": true,
+      "email": "premium@fin-mcp.local",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "premium"
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "analyst-user",
+      "firstName": "analyst",
+      "lastName": "user",
+      "enabled": true,
+      "email": "analyst@fin-mcp.local",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "analyst"
+      ],
+      "requiredActions": []
+    }
+  ]
+}

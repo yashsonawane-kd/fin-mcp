@@ -5,7 +5,10 @@ description = "MCP server for financial APIs"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "httpx>=0.28.1",
     "mcp>=1.26.0",
+    "pydantic-settings>=2.13.1",
+    "python-jose[cryptography]>=3.5.0",
     "structlog>=25.5.0",
 ]
 
@@ -15,6 +18,8 @@ fin-mcp = "fin_mcp.server:main"
 [dependency-groups]
 dev = [
     "mypy<1.20.0",
+    "types-python-jose>=3.5.0.20250531",
+    "uvicorn>=0.42.0",
 ]
 
 [tool.mypy]
