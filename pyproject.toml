@@ -9,6 +9,7 @@ dependencies = [
     "mcp>=1.26.0",
     "pydantic-settings>=2.13.1",
     "python-jose[cryptography]>=3.5.0",
+    "redis[hiredis]>=7.4.0",
     "structlog>=25.5.0",
 ]
 

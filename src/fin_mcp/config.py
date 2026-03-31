@@ -12,6 +12,14 @@ class Settings(BaseSettings):
     mcp_port: int = 3000
     log_level: str = "INFO"
 
+    # Redis
+    redis_url: str = "redis://localhost:6379/0"
+
+    # Upstream API keys
+    alpha_vantage_api_key: str = ""
+    finnhub_api_key: str = ""
+    newsapi_api_key: str = ""
+
     @property
     def jwks_url(self) -> str:
         return f"{self.keycloak_url}/realms/{self.keycloak_realm}/protocol/openid-connect/certs"
