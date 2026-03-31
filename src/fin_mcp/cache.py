@@ -53,4 +53,9 @@ class CacheClient:
         logger.debug("Cache delete", key=key)
 
 
-cache = CacheClient()
+_cache = CacheClient()
+
+
+def get_cache() -> CacheClient:
+    """Return the module-level CacheClient singleton."""
+    return _cache
