@@ -85,7 +85,7 @@ TTL_FILINGS    = 0          # permanent (no expiry)
   ```json
   {"error": "rate_limit_exceeded", "retry_after": <seconds_until_next_window>}
   ```
-- Gets Redis client from `request.app.state.redis`
+- Gets Redis client from `cache._require_client()` (the module-level cache singleton)
 
 ### Step 4 — `src/fin_mcp/audit.py`
 
@@ -146,9 +146,8 @@ Two changes:
 ```python
 @asynccontextmanager
 async def lifespan(server: FastMCP) -> AsyncGenerator[None, None]:
-    redis_client = redis.asyncio.from_url(settings.redis_url)
-    app.state.redis = redis_client    # for RateLimitMiddleware
-    cache.set_client(redis_client)    # for CacheClient
+    redis_client = aioredis.from_url(settings.redis_url, decode_responses=True)
+    cache.set_client(redis_client)    # shared by CacheClient and RateLimitMiddleware
     yield
     await redis_client.aclose()
 

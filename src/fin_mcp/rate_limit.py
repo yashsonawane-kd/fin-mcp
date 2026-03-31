@@ -7,6 +7,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from fin_mcp.auth.validator import TokenClaims
+from fin_mcp.cache import cache
 from fin_mcp.config import settings
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
@@ -31,7 +32,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         hour_bucket = int(time.time() // 3600)
         key = f"rate_limit:{claims.subject}:{hour_bucket}"
 
-        redis = request.app.state.redis
+        redis = cache._require_client()
         count: int = await redis.incr(key)
         if count == 1:
             # First call in this window — set expiry
